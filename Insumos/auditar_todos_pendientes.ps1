@@ -6,6 +6,7 @@ $Runtime = "$Base\Cache\_runtime"
 $Salida = "$Base\Salida\auditoria_equipo_consolidado.xlsx"
 $Config = Get-Content -LiteralPath "$PSScriptRoot\config_auditoria.json" -Raw | ConvertFrom-Json
 $PdfDir = Join-Path $Base $Config.pdf_dir
+$ExcelPath = Join-Path $Base $Config.excel_file
 
 $Python = $null
 $PythonArgs = @()
@@ -30,13 +31,10 @@ if (Test-Path -LiteralPath $VenvPython) {
   throw "No se encontro Python. Instala Python 3.12 y vuelve a ejecutar este BAT."
 }
 
-$ArchivoEntrada = Get-ChildItem -LiteralPath "$Base\Entrada" -Filter "DGINC-DA-SECLYT_*.xlsx" |
-  Where-Object { $_.Name -notlike "~$*" -and $_.Name -notlike "auditoria_*" -and $_.Name -notlike "reporte_*" } |
-  Sort-Object LastWriteTime -Descending |
-  Select-Object -First 1
-if ($null -eq $ArchivoEntrada) {
-  throw "No se encontro archivo de entrada DGINC-DA-SECLYT_*.xlsx en $Base\Entrada"
+if (-not (Test-Path -LiteralPath $ExcelPath)) {
+  throw "No se encontro el Excel configurado en Insumos\config_auditoria.json: $ExcelPath"
 }
+$ArchivoEntrada = Get-Item -LiteralPath $ExcelPath
 
 $LimitInput = Read-Host "Cuantos PDFs pendientes queres auditar? Limit (ej: 5, 10)"
 if ([string]::IsNullOrWhiteSpace($LimitInput)) { $LimitInput = "5" }
