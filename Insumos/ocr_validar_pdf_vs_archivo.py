@@ -2697,18 +2697,21 @@ def main():
 
     if args.omitir_auditoria_previa:
         if args.columna_auditoria_previa not in df_team.columns:
-            raise ValueError(
-                f"No existe la columna de auditoria previa '{args.columna_auditoria_previa}'."
+            print(
+                f"ADVERTENCIA: el Excel no contiene '{args.columna_auditoria_previa}'. "
+                "Se continua usando el consolidado para omitir casos ya procesados.",
+                flush=True,
             )
-        previous_mask = df_team[args.columna_auditoria_previa].map(
-            lambda value: normalize_manual_review(value) != ""
-        )
-        previous_count = int(previous_mask.sum())
-        df_team = df_team[~previous_mask].copy()
-        print(
-            f"Registros con auditoria humana previa omitidos: {previous_count}",
-            flush=True,
-        )
+        else:
+            previous_mask = df_team[args.columna_auditoria_previa].map(
+                lambda value: normalize_manual_review(value) != ""
+            )
+            previous_count = int(previous_mask.sum())
+            df_team = df_team[~previous_mask].copy()
+            print(
+                f"Registros con auditoria humana previa omitidos: {previous_count}",
+                flush=True,
+            )
 
     if args.solo_revisados:
         if args.columna_revisado not in df_team.columns:
